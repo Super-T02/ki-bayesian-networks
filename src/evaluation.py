@@ -18,11 +18,29 @@ class Evaluation():
     def calc_stats(self):
         """Calculates the accuracy, mean absolute error and confusion matrix for a model."""
         self.accuracy = accuracy_score(self.y_true, self.y_pred)
+        self.mean_false_error = self.mean_error_false(self.y_true, self.y_pred)
         self.mean_absolute_error = mean_absolute_error(self.y_true, self.y_pred)
         self.confusion_matrix = multilabel_confusion_matrix(self.y_true, self.y_pred)
         self.f1_score = f1_score(self.y_true, self.y_pred, average="macro")
         self.precision = precision_score(self.y_true, self.y_pred, average="macro")
         self.recall = recall_score(self.y_true, self.y_pred, average="macro")
+    
+    def mean_error_false(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
+        """Calculates the mean error for false predictions.
+
+        Args:
+            y_true (np.ndarray): The true labels.
+            y_pred (np.ndarray): The predicted labels.
+
+        Returns:
+            float: The mean error for false predictions.
+        """
+        distances = []
+        for i in range(len(y_true)):
+            if y_true[i] != y_pred[i]:
+                distances.append(abs(y_true[i] - y_pred[i]))
+        return np.mean(distances)
+                
     
     def print_stats(self):
         """Prints the accuracy and mean absolute error for a model.
@@ -31,6 +49,7 @@ class Evaluation():
             y_pred (list): The predicted labels.
         """
         print("Accuracy:", self.accuracy)
+        print("Mean false error:", self.mean_false_error)
         print("Mean absolute error:", self.mean_absolute_error)
         print("Precision:", self.precision)
         print("Recall:", self.recall)
@@ -61,12 +80,19 @@ class Evaluation():
             y_tn.append(rates["TN"])
                 
         # Build the plot
-        plt.figure(figsize=(10, 5))
+        plt.figure(figsize=(20, 5))
 
+        plt.subplot(1, 2, 1)
         plt.plot(x, y_fp, color="red", label="False Positives (FP)")
         plt.plot(x, y_tp, color="green" , label="True Positives (TP)")
-        plt.plot(x, y_fn, color="pink", label="False Negatives (FN)")
-        plt.plot(x, y_tn, color="blue", label="True Negatives (TN)")
+        plt.legend(loc="best")
+        plt.xlabel("Grade")
+        plt.ylabel("X Rate")
+        plt.xticks(x)
+        
+        plt.subplot(1, 2, 2)
+        plt.plot(x, y_fn, color="red", label="False Negatives (FN)")
+        plt.plot(x, y_tn, color="green", label="True Negatives (TN)")
         plt.legend(loc="best")
         plt.xlabel("Grade")
         plt.ylabel("X Rate")
