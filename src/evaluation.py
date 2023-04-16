@@ -1,6 +1,8 @@
-from sklearn.metrics import accuracy_score, f1_score, mean_absolute_error, multilabel_confusion_matrix, precision_score, recall_score
+from sklearn.metrics import accuracy_score, f1_score, mean_absolute_error, precision_score, recall_score, confusion_matrix
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
 
 class Evaluation():
     
@@ -12,7 +14,7 @@ class Evaluation():
         
         self.accuracy = None
         self.mean_absolute_error = None
-        self.confusion_matrix = None
+        self.tp_fp_tn_fn = None
         self.calc_stats()       
                
     def calc_stats(self):
@@ -20,20 +22,20 @@ class Evaluation():
         self.accuracy = accuracy_score(self.y_true, self.y_pred)
         self.mean_false_error = self.mean_error_false(self.y_true, self.y_pred)
         self.mean_absolute_error = mean_absolute_error(self.y_true, self.y_pred)
-        self.confusion_matrix = self.calc_confusion_matrix(self.y_true, self.y_pred)
+        self.tp_fp_tn_fn = self.calc_tp_fp_tn_fn(self.y_true, self.y_pred)
         self.f1_score = f1_score(self.y_true, self.y_pred, average="macro")
         self.precision = precision_score(self.y_true, self.y_pred, average="macro")
         self.recall = recall_score(self.y_true, self.y_pred, average="macro")
         
-    def calc_confusion_matrix(self, y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
-        """Calculates the confusion matrix for a model.
+    def calc_tp_fp_tn_fn(self, y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
+        """Calculates the True Positives, False Positives, True Negatives and False Negatives for each grade.
 
         Args:
             y_true (np.ndarray): The true labels.
             y_pred (np.ndarray): The predicted labels.
 
         Returns:
-            np.ndarray: The confusion matrix.
+            np.ndarray: The True Positives, False Positives, True Negatives and False Negatives for each grade.
         """
         GRADE_MAX = 20
         matrix = np.zeros((GRADE_MAX + 1, 2, 2))
@@ -91,12 +93,12 @@ class Evaluation():
             y_pred (list): The predicted labels.
         """
         # Set up plot
-        N = self.confusion_matrix.shape[0]
+        N = self.tp_fp_tn_fn.shape[0]
         x = np.array([i for i in range(0, N)])
         y_fp, y_fn, y_tn, y_tp  = [], [], [], []
 
         # Get the values for each grade
-        for i, cm in enumerate(self.confusion_matrix):
+        for i, cm in enumerate(self.tp_fp_tn_fn):
             rates = {
                 "TP": cm[1][1],
                 "TN": cm[0][0],
@@ -126,4 +128,20 @@ class Evaluation():
         plt.xlabel("Grade")
         plt.ylabel("X Rate")
         plt.xticks(x)
+        plt.show()
+        
+    def plot_confusion_matrix(self) -> None:
+        """Plots the confusion matrix for a model."""
+        GRADE_MAX = 20
+        labels = [i for i in range(0, GRADE_MAX + 1)]
+        cm = confusion_matrix(self.y_true, self.y_pred, labels=labels)
+        cm = pd.DataFrame(cm, index=labels, columns=labels)
+        cm.index.name = 'Actual'
+        cm.columns.name = 'Predicted'
+        # create empty figure with a specified size
+        fig, ax = plt.subplots(figsize=(20, 10))
+        
+        plt.title("Confusion Matrix")
+        sns.heatmap(cm, ax=ax, cmap="Blues", annot=True, fmt='g')
+        #plt.savefig(filename)
         plt.show()
