@@ -20,10 +20,39 @@ class Evaluation():
         self.accuracy = accuracy_score(self.y_true, self.y_pred)
         self.mean_false_error = self.mean_error_false(self.y_true, self.y_pred)
         self.mean_absolute_error = mean_absolute_error(self.y_true, self.y_pred)
-        self.confusion_matrix = multilabel_confusion_matrix(self.y_true, self.y_pred)
+        self.confusion_matrix = self.calc_confusion_matrix(self.y_true, self.y_pred)
         self.f1_score = f1_score(self.y_true, self.y_pred, average="macro")
         self.precision = precision_score(self.y_true, self.y_pred, average="macro")
         self.recall = recall_score(self.y_true, self.y_pred, average="macro")
+        
+    def calc_confusion_matrix(self, y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
+        """Calculates the confusion matrix for a model.
+
+        Args:
+            y_true (np.ndarray): The true labels.
+            y_pred (np.ndarray): The predicted labels.
+
+        Returns:
+            np.ndarray: The confusion matrix.
+        """
+        GRADE_MAX = 20
+        matrix = np.zeros((GRADE_MAX + 1, 2, 2))
+        
+        for i in range(0, GRADE_MAX + 1):
+            # Iterate over all predictions
+            for j in range(len(y_true)):
+                if y_true[j] == i: # If the true label is the current grade
+                    if y_true[j] == y_pred[j]: # If the prediction is correct --> TP
+                        matrix[i][1][1] += 1
+                    else: # If the prediction is wrong --> FN
+                        matrix[i][1][0] += 1
+                else: # If the true label is not the current grade
+                    if i != y_pred[j]: # If the prediction is correct --> TN
+                        matrix[i][0][0] += 1
+                    else: # If the prediction is wrong --> FP
+                        matrix[i][0][1] += 1
+
+        return matrix
     
     def mean_error_false(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         """Calculates the mean error for false predictions.
