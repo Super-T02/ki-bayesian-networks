@@ -11,7 +11,12 @@ class Preprocessing(abc.ABC):
     def __init__(self, data: pd.DataFrame) -> "Preprocessing":
         self._original_data: pd.DataFrame = data.copy()
         self._processed_data: pd.DataFrame | None = None
-        
+    
+    @property
+    def original_data(self) -> pd.DataFrame:
+        """The original data."""
+        return self._original_data
+    
     @property
     def processed_data(self) -> pd.DataFrame | None:
         """The processed data."""
@@ -48,7 +53,7 @@ class PreprocessingCSV(Preprocessing):
     CSV_STRUCTURE = ['school', 'sex', 'age', 'address', 'famsize', 'Pstatus', 'Medu', 'Fedu', 'Mjob', 'Fjob', 'reason', 'guardian', 'traveltime', 'studytime', 'failures', 'schoolsup', 'famsup', 'paid', 'activities', 'nursery', 'higher', 'internet', 'romantic', 'famrel', 'freetime', 'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2', 'G3']
     TRANSFORM_TO_NUMERICAL = ['Mjob', 'Fjob']
     
-    def __init__(self, path: str, *args, **kwargs) -> "PreprocessingCSV":
+    def __init__(self, data: pd.DataFrame) -> "PreprocessingCSV":
         """Load the csv file and initialize the PreprocessingCSV class.
 
         Args:
@@ -57,7 +62,7 @@ class PreprocessingCSV(Preprocessing):
         Returns:
             PreprocessingCSV: PreprocessingCSV class.
         """
-        data = pd.read_csv(path, *args, **kwargs)
+        # data = pd.read_csv(path, *args, **kwargs)
         super().__init__(data)
         
     def process(self) -> None:
@@ -211,6 +216,6 @@ class PreprocessingCSV(Preprocessing):
             data[new_name] = data[cols[0]].astype(np.float64)
             data = data.drop(cols, axis=1)
         else:
-            print(f'No columns found for {old_names} and {new_name}.')
+            pass
             
         return data
