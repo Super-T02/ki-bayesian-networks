@@ -1,5 +1,6 @@
 import abc
 import pandas as pd
+import numpy as np
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import make_column_transformer
@@ -45,7 +46,7 @@ class PreprocessingCSV(Preprocessing):
     """The preprocessing class for CSV files."""
     
     CSV_STRUCTURE = ['school', 'sex', 'age', 'address', 'famsize', 'Pstatus', 'Medu', 'Fedu', 'Mjob', 'Fjob', 'reason', 'guardian', 'traveltime', 'studytime', 'failures', 'schoolsup', 'famsup', 'paid', 'activities', 'nursery', 'higher', 'internet', 'romantic', 'famrel', 'freetime', 'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2', 'G3']
-    TRANSFORM_TO_NUMERICAL = ['Medu', 'Fedu']
+    TRANSFORM_TO_NUMERICAL = ['Mjob', 'Fjob']
     
     def __init__(self, path: str, *args, **kwargs) -> "PreprocessingCSV":
         """Load the csv file and initialize the PreprocessingCSV class.
@@ -77,7 +78,7 @@ class PreprocessingCSV(Preprocessing):
         # Merge columns to desired structure
         data = self._merge_columns(data)
         
-        return data
+        self._processed_data = data
         
     def _create_binary_columns(self, data: pd.DataFrame) -> pd.DataFrame:
         """Create binary columns for the given data and columns that exist.
@@ -88,6 +89,7 @@ class PreprocessingCSV(Preprocessing):
         Returns:
             pd.DataFrame: Data with binary columns.
         """
+        data = data.copy()
         
         if 'school' in data.columns:
             data['school'] = data['school'].map({'GP': 0, 'MS': 1})
@@ -127,6 +129,7 @@ class PreprocessingCSV(Preprocessing):
         Returns:
             pd.DataFrame: Transformed dataframe.
         """
+        data = data.copy()
         
         # Transform existing columns only to avoid errors
         cols = []
@@ -150,38 +153,39 @@ class PreprocessingCSV(Preprocessing):
         Returns:
             pd.DataFrame: Data with merged columns.
         """
+        data = data.copy()
         # Support
         cols = self._extract_existing_cols(data, ['schoolsup', 'famsup', 'paid'])
         if len(cols) > 0:
-            df['sup'] = df.apply(lambda row: row[cols].sum(), axis=1)
+            data['sup'] = data.apply(lambda row: row[cols].sum(), axis=1)
             data = data.drop(cols, axis=1)
 
         # Alcohol
         cols = self._extract_existing_cols(data, ['Dalc', 'Walc'])
         if len(cols) > 0:
-            df['alc'] = df[cols].median(axis=1).round(0)
-            df = df.drop(cols, axis=1)
+            data['alc'] = data[cols].median(axis=1).round(0)
+            data = data.drop(cols, axis=1)
 
         # Social
         cols = self._extract_existing_cols(data, ['goout', 'freetime'])
         if len(cols) > 0:
-            df['social'] = df[cols].median(axis=1).round(0)
-            df = df.drop(cols, axis=1)
+            data['social'] = data[cols].median(axis=1).round(0)
+            data = data.drop(cols, axis=1)
 
         # Parent education
         cols = self._extract_existing_cols(data, ['Medu', 'Fedu'])
         if len(cols) > 0:
-            df['Pedu'] = df[cols].median(axis=1).round(0)
-            df = df.drop(cols, axis=1)
+            data['Pedu'] = data[cols].median(axis=1).round(0)
+            data = data.drop(cols, axis=1)
 
         # Jobs
-        self._merge_job(data, ['Mjob_at_home', 'Fjob_at_home'], 'Pjob_at_home')
-        self._merge_job(data, ['Mjob_health', 'Fjob_health'], 'Pjob_health')
-        self._merge_job(data, ['Mjob_services', 'Fjob_services'], 'Pjob_services')
-        self._merge_job(data, ['Mjob_teacher', 'Fjob_teacher'], 'Pjob_teacher')
-        self._merge_job(data, ['Mjob_other', 'Fjob_other'], 'Pjob_other')
+        data = self._merge_job(data, ['Mjob_teacher', 'Fjob_teacher'], 'Pjob_teacher')
+        data = self._merge_job(data, ['Mjob_health', 'Fjob_health'], 'Pjob_health')
+        data = self._merge_job(data, ['Mjob_services', 'Fjob_services'], 'Pjob_services')
+        data = self._merge_job(data, ['Mjob_at_home', 'Fjob_at_home'], 'Pjob_at_home')
+        data = self._merge_job(data, ['Mjob_other', 'Fjob_other'], 'Pjob_other')
         
-        return df
+        return data
     
     def _merge_job(self, data: pd.DataFrame, old_names: list[str], new_name: str) -> pd.DataFrame:
         """Maps the given jobs to the new job name.
@@ -194,6 +198,8 @@ class PreprocessingCSV(Preprocessing):
         Returns:
             pd.DataFrame: Transformed dataframe.
         """
+        data = data.copy()
+        
         if len(old_names) > 2:
             raise ValueError('Only two old names are allowed.')
         
@@ -202,17 +208,9 @@ class PreprocessingCSV(Preprocessing):
             data[new_name] = data.apply(lambda row: 1. if row[cols[0]] == 1 or row[cols[1]] == 1 else 0., axis=1)
             data = data.drop(cols, axis=1)
         elif len(cols) == 1:
-            data[new_name] = data[cols[0]]
+            data[new_name] = data[cols[0]].astype(np.float64)
             data = data.drop(cols, axis=1)
-        
-        # if old_names[0] in cols and old_names[1] in cols:
-        #     data[new_name] = data.apply(lambda row: 1. if row[old_names[0]] == 1 or row[old_names[1]] == 1 else 0., axis=1)
-        #     data = data.drop(old_names, axis=1)
-        # elif old_names[0] in cols and old_names[1] not in cols:
-        #     data[new_name] = data[old_names[0]]
-        #     data = data.drop(old_names[0], axis=1)
-        # elif old_names[0] not in cols and old_names[1] in cols:
-        #     data[new_name] = data[old_names[1]]
-        #     data = data.drop(old_names[1], axis=1)
+        else:
+            print(f'No columns found for {old_names} and {new_name}.')
             
         return data
