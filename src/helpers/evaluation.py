@@ -7,25 +7,53 @@ import seaborn as sns
 class Evaluation():
     
     MATCH_LESS_EQUAL = 0
+    GRADE_MAX = 17
+    GRADE_MIN = 7
     
-    def __init__(self, y_true: np.ndarray, y_pred: np.ndarray):
-        self.y_true = y_true
-        self.y_pred = y_pred
+    def __init__(self, result: pd.DataFrame):
+        if "G3" not in result.columns or "G3_pred" not in result.columns:
+            raise ValueError("The result DataFrame must contain the columns G3 and G3_pred.")
+        
+        self.y_true = result["G3"].to_numpy().astype(str)
+        self.y_pred = result["G3_pred"].to_numpy().astype(str)
+        self.y_true_int = self.map_grades(self.y_true.copy())
+        self.y_pred_int = self.map_grades(self.y_pred.copy())
         
         self.accuracy = None
         self.mean_absolute_error = None
         self.tp_fp_tn_fn = None
         self.calc_stats()       
+    
+    def map_grades(self, list: np.ndarray) -> np.ndarray:
+        """Maps the grades to the correct values.
+        <7 --> 0
+        7 - 17 --> 1 - 11
+        >17 --> 12
+
+        Args:
+            list (np.ndarray): The list of grades.
+
+        Returns:
+            np.ndarray: The list of mapped grades.
+        """
+        for i in range(len(list)):
+            if list[i] == '<7':
+                list[i] = 0
+            elif list[i] == '>17':
+                list[i] = 12
+            else:
+                list[i] = int(list[i]) - 6
+        return list.astype(np.int64)
                
     def calc_stats(self):
         """Calculates the accuracy, mean absolute error and confusion matrix for a model."""
-        self.accuracy = accuracy_score(self.y_true, self.y_pred)
-        self.mean_false_error = self.mean_error_false(self.y_true, self.y_pred)
-        self.mean_absolute_error = mean_absolute_error(self.y_true, self.y_pred)
-        self.tp_fp_tn_fn = self.calc_tp_fp_tn_fn(self.y_true, self.y_pred)
-        self.f1_score = f1_score(self.y_true, self.y_pred, average="macro")
-        self.precision = precision_score(self.y_true, self.y_pred, average="macro")
-        self.recall = recall_score(self.y_true, self.y_pred, average="macro")
+        self.accuracy = accuracy_score(self.y_true_int, self.y_pred_int)
+        self.mean_false_error = self.mean_error_false(self.y_true_int, self.y_pred_int)
+        self.mean_absolute_error = mean_absolute_error(self.y_true_int, self.y_pred_int)
+        self.tp_fp_tn_fn = self.calc_tp_fp_tn_fn(self.y_true_int, self.y_pred_int)
+        self.f1_score = f1_score(self.y_true_int, self.y_pred_int, average="macro")
+        self.precision = precision_score(self.y_true_int, self.y_pred_int, average="macro")
+        self.recall = recall_score(self.y_true_int, self.y_pred_int, average="macro")
         
     def calc_tp_fp_tn_fn(self, y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
         """Calculates the True Positives, False Positives, True Negatives and False Negatives for each grade.
@@ -37,10 +65,9 @@ class Evaluation():
         Returns:
             np.ndarray: The True Positives, False Positives, True Negatives and False Negatives for each grade.
         """
-        GRADE_MAX = 20
-        matrix = np.zeros((GRADE_MAX + 1, 2, 2))
+        matrix = np.zeros((self.GRADE_MAX - self.GRADE_MIN + 3, 2, 2))
         
-        for i in range(0, GRADE_MAX + 1):
+        for i in range(0, self.GRADE_MAX - self.GRADE_MIN + 3):
             # Iterate over all predictions
             for j in range(len(y_true)):
                 if y_true[j] == i: # If the true label is the current grade
@@ -93,8 +120,7 @@ class Evaluation():
             y_pred (list): The predicted labels.
         """
         # Set up plot
-        N = self.tp_fp_tn_fn.shape[0]
-        x = np.array([i for i in range(0, N)])
+        x = [f"<{self.GRADE_MIN}"] + [f'{i}' for i in range(self.GRADE_MIN, self.GRADE_MAX + 1)] + [f">{self.GRADE_MAX}"]
         y_fp, y_fn, y_tn, y_tp  = [], [], [], []
 
         # Get the values for each grade
@@ -132,14 +158,12 @@ class Evaluation():
         
     def plot_confusion_matrix(self) -> None:
         """Plots the confusion matrix for a model."""
-        GRADE_MAX = 20
-        labels = [i for i in range(0, GRADE_MAX + 1)]
+        labels = [f"<{self.GRADE_MIN}"] + [f'{i}' for i in range(self.GRADE_MIN, self.GRADE_MAX + 1)] + [f">{self.GRADE_MAX}"]
         cm = confusion_matrix(self.y_true, self.y_pred, labels=labels)
         cm = pd.DataFrame(cm, index=labels, columns=labels)
         cm.index.name = 'Actual'
         cm.columns.name = 'Predicted'
-        # create empty figure with a specified size
-        fig, ax = plt.subplots(figsize=(20, 10))
+        _, ax = plt.subplots(figsize=(20, 10))
         
         plt.title("Confusion Matrix")
         sns.heatmap(cm, ax=ax, cmap="Blues", annot=True, fmt='g')

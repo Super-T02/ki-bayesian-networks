@@ -1,5 +1,4 @@
-from framework import Framework
-from app.preprocessing import PreprocessingCSV
+from app.preprocessing import TunedPreprocessing
 from pgmpy.models import BayesianNetwork
 
 import pandas as pd
@@ -48,7 +47,7 @@ class Network:
         self.network = BayesianNetwork()
         self._state_names = self.STATES
         data = pd.read_csv(file_path, sep=";")
-        pre = PreprocessingCSV(data)
+        pre = TunedPreprocessing(data)
         pre.process()
         self.train_data = pre.processed_data 
         self.train_data = self.train_data.drop(self.train_data[self.train_data['G3'] == 0].index)
@@ -142,7 +141,17 @@ class Network:
             ('studytime', 'higher'),
         ]
         
-        Framework.add_edges(self.network, edges)
+        # Add edges to the network
+        self.add_edges(edges)
+    
+    def add_edges(self, edges: list) -> None:
+        """Add edges to the network.
+
+        Args:
+            edges (list): The edges to be added: [(from, to), (from, to), ...]
+        """
+        for edge in edges:
+            self.network.add_edge(*edge)
     
     def fit(self) -> None:
         """Fit the network to the data."""
@@ -170,7 +179,9 @@ class NetworkG1G2(Network):
             ('alc', 'G3'),
             ('studytime', 'G3'),
         ]
-        Framework.add_edges(self.network, edges)
+        
+        # Add edges to the network
+        self.add_edges(edges)
         
 class NetworkG1OrG2(Network):
     """The final Bayesian network model with missing G1 or G2."""
@@ -203,4 +214,6 @@ class NetworkG1OrG2(Network):
             ('alc', 'G2'),
             ('studytime', 'G2'),
         ]
-        Framework.add_edges(self.network, edges)
+        
+        # Add edges to the network
+        self.add_edges(edges)

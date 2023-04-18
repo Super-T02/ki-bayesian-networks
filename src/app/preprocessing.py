@@ -23,7 +23,7 @@ class Preprocessing(abc.ABC):
         return self._processed_data
         
     @abc.abstractmethod
-    def process(self) -> None:
+    def process(self) -> "Preprocessing":
         """Processes the data."""
         raise NotImplementedError
     
@@ -46,45 +46,33 @@ class Preprocessing(abc.ABC):
             if col in data.columns:
                 cols.append(col)
         return cols
-        
-class PreprocessingCSV(Preprocessing):
-    """The preprocessing class for CSV files."""
     
-    CSV_STRUCTURE = ['school', 'sex', 'age', 'address', 'famsize', 'Pstatus', 'Medu', 'Fedu', 'Mjob', 'Fjob', 'reason', 'guardian', 'traveltime', 'studytime', 'failures', 'schoolsup', 'famsup', 'paid', 'activities', 'nursery', 'higher', 'internet', 'romantic', 'famrel', 'freetime', 'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2', 'G3']
-    TRANSFORM_TO_NUMERICAL = ['Mjob', 'Fjob']
+class BinaryPreprocessing(Preprocessing):
+    """Preprocessing binary data."""
+    STRUCTURE = ['school', 'sex', 'age', 'address', 'famsize', 'Pstatus', 'Medu', 'Fedu', 'Mjob', 'Fjob', 'reason', 'guardian', 'traveltime', 'studytime', 'failures', 'schoolsup', 'famsup', 'paid', 'activities', 'nursery', 'higher', 'internet', 'romantic', 'famrel', 'freetime', 'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2', 'G3']
     
-    def __init__(self, data: pd.DataFrame) -> "PreprocessingCSV":
-        """Load the csv file and initialize the PreprocessingCSV class.
-
-        Args:
-            path (str): Path to the csv file.
-
-        Returns:
-            PreprocessingCSV: PreprocessingCSV class.
-        """
-        # data = pd.read_csv(path, *args, **kwargs)
+    def __init__(self, data: pd.DataFrame) -> "Preprocessing":
         super().__init__(data)
         
-    def process(self) -> None:
-        """Processes the data."""
+    def process(self) -> "BinaryPreprocessing":
         data = self._original_data.copy()
         
         # Delete columns which are not defined
         for column in data.columns:
-            if column not in self.CSV_STRUCTURE:
+            if column not in self.STRUCTURE:
                 del data[column]     
         
         # Create binary columns
         data = self._create_binary_columns(data)
         
-        # Create numerical columns
-        data = self._create_numerical_columns(data)
+        # Set bounds for the grades, age and absences
+        data = self._bound_cols(data)
         
-        # Merge columns to desired structure
-        data = self._merge_columns(data)
         
         self._processed_data = data
         
+        return self
+    
     def _create_binary_columns(self, data: pd.DataFrame) -> pd.DataFrame:
         """Create binary columns for the given data and columns that exist.
 
@@ -124,6 +112,57 @@ class PreprocessingCSV(Preprocessing):
             data['romantic'] = data['romantic'].map({'yes': 1, 'no': 0})
         
         return data
+    
+    def _bound_cols(self, data: pd.DataFrame) -> pd.DataFrame:
+        """Bounds the grades to the lower (7) and upper bound (17). 
+        Absences have the upper bound of 15 and age of 20.
+        
+        Args:
+            data (pd.DataFrame): To be bounded.
+            
+        Returns:
+            pd.DataFrame: Data with bounded cols.        
+        """
+        data = data.copy()
+        
+        data['G1'] = data['G1'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
+        data['G2'] = data['G2'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
+        data['G3'] = data['G3'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
+        data['absences'] = data['absences'].apply(lambda x: '>15' if x > 15 else f'{x}')
+        data['age'] = data['age'].apply(lambda x: '>20' if x > 20 else f'{x}')
+        
+        return data
+        
+class TunedPreprocessing(BinaryPreprocessing):
+    """The preprocessing for the compressed network."""
+    
+    TRANSFORM_TO_NUMERICAL = ['Mjob', 'Fjob']
+    
+    def __init__(self, data: pd.DataFrame) -> "TunedPreprocessing":
+        """Initializes the preprocessing for the compressed network.
+
+        Args:
+            data (pd.DataFrame): Data to be processed.
+
+        Returns:
+            PreprocessingCompressed: The preprocessing object.
+        """
+        super().__init__(data)
+        
+    def process(self) -> "TunedPreprocessing":
+        """Processes the data."""
+        # Delete not needed columns and create binary columns
+        data = super().process()._processed_data.copy()
+        
+        # Create numerical columns
+        data = self._create_numerical_columns(data)
+        
+        # Merge columns to desired structure
+        data = self._merge_columns(data)
+        
+        self._processed_data = data
+        
+        return self
         
     def _create_numerical_columns(self, data: pd.DataFrame) -> pd.DataFrame:
         """Transform columns from categorical to numerical.
