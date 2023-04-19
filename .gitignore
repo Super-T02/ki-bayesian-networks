@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 .$*
 .~lock.*
+
+# cpds
+doc/cpds/*.txt

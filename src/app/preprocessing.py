@@ -63,11 +63,10 @@ class BinaryPreprocessing(Preprocessing):
                 del data[column]     
         
         # Create binary columns
-        data = self._create_binary_columns(data)
+        data = self._create_binary_columns(data)   
         
-        # Set bounds for the grades, age and absences
-        data = self._bound_cols(data)
-        
+        # Transform age and absences
+        data = self._bound_age_absences(data)     
         
         self._processed_data = data
         
@@ -110,24 +109,24 @@ class BinaryPreprocessing(Preprocessing):
             data['internet'] = data['internet'].map({'yes': 1, 'no': 0})
         if 'romantic' in data.columns:
             data['romantic'] = data['romantic'].map({'yes': 1, 'no': 0})
+        # # !NOT SURE IF THIS IS CORRECT!
+        # if 'failures' in data.columns:
+        #     data['failures'] = data['failures'].apply(lambda x: 1 if x > 0 else 0)
         
         return data
     
-    def _bound_cols(self, data: pd.DataFrame) -> pd.DataFrame:
-        """Bounds the grades to the lower (7) and upper bound (17). 
+    def _bound_age_absences(self, data: pd.DataFrame) -> pd.DataFrame:
+        """Bounds the age and absences to the desired values.
         Absences have the upper bound of 15 and age of 20.
-        
+
         Args:
-            data (pd.DataFrame): To be bounded.
-            
+            data (pd.DataFrame): Data to bound the values.
+
         Returns:
-            pd.DataFrame: Data with bounded cols.        
+            pd.DataFrame: Data with bounded values.
         """
         data = data.copy()
         
-        data['G1'] = data['G1'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
-        data['G2'] = data['G2'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
-        data['G3'] = data['G3'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
         data['absences'] = data['absences'].apply(lambda x: '>15' if x > 15 else f'{x}')
         data['age'] = data['age'].apply(lambda x: '>20' if x > 20 else f'{x}')
         
@@ -233,6 +232,7 @@ class TunedPreprocessing(BinaryPreprocessing):
     
     def _merge_job(self, data: pd.DataFrame, old_names: list[str], new_name: str) -> pd.DataFrame:
         """Maps the given jobs to the new job name.
+        
 
         Args:
             data (pd.DataFrame): Dataframe to be transformed.
@@ -257,4 +257,57 @@ class TunedPreprocessing(BinaryPreprocessing):
         else:
             pass
             
+        return data
+    
+class BinaryOutPutPreprocessing(Preprocessing):
+    
+    def __init__(self, data: pd.DataFrame) -> "BinaryOutPutPreprocessing":
+        super().__init__(data)
+        
+    def process(self) -> "BinaryOutPutPreprocessing":
+        """Processes the data.
+
+        Returns:
+            BinaryOutPutPreprocessing: Self.
+        """
+        data = self.original_data.copy()
+        
+        data['G3'] = data['G3'].apply(lambda x: 1 if x > 10 else 0)
+    
+        self._processed_data = data
+        
+        return self
+        
+class BoundOutPutPreprocessing(Preprocessing):
+    
+    def __init__(self, data: pd.DataFrame) -> "BoundOutPutPreprocessing":
+        super().__init__(data)
+        
+    def process(self) -> "BoundOutPutPreprocessing":
+        """Processes the data.
+
+        Returns:
+            BoundOutPutPreprocessing: Self
+        """
+        data = self.original_data.copy()
+        data = self._bound_cols(data)
+        self._processed_data = data
+        
+        return self
+        
+    def _bound_cols(self, data: pd.DataFrame) -> pd.DataFrame:
+        """Bounds the grades to the lower (7) and upper bound (17).
+        
+        Args:
+            data (pd.DataFrame): To be bounded.
+            
+        Returns:
+            pd.DataFrame: Data with bounded cols.        
+        """
+        data = data.copy()
+        
+        data['G1'] = data['G1'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
+        data['G2'] = data['G2'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
+        data['G3'] = data['G3'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
+    
         return data
