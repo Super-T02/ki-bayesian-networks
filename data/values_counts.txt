@@ -1,16 +1,19 @@
 school: ['GP' 'MS'] 
+school
 GP    390
 MS    209
-Name: school, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 sex: ['F' 'M'] 
+sex
 F    358
 M    241
-Name: sex, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 age: [15 16 17 18 19 20 21 22] 
+age
 16    167
 17    158
 18    130
@@ -19,205 +22,232 @@ age: [15 16 17 18 19 20 21 22]
 20      6
 21      2
 22      1
-Name: age, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 address: ['R' 'U'] 
+address
 U    412
 R    187
-Name: address, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 famsize: ['GT3' 'LE3'] 
+famsize
 GT3    427
 LE3    172
-Name: famsize, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 Pstatus: ['A' 'T'] 
+Pstatus
 T    527
 A     72
-Name: Pstatus, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 Medu: [0 1 2 3 4] 
+Medu
 2    173
 4    157
 1    136
 3    127
 0      6
-Name: Medu, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 Fedu: [0 1 2 3 4] 
+Fedu
 2    192
 1    165
 3    123
 4    113
 0      6
-Name: Fedu, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 Mjob: ['at_home' 'health' 'other' 'services' 'teacher'] 
+Mjob
 other       233
 at_home     127
 services    127
 teacher      68
 health       44
-Name: Mjob, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 Fjob: ['at_home' 'health' 'other' 'services' 'teacher'] 
+Fjob
 other       339
 services    168
 at_home      40
 teacher      32
 health       20
-Name: Fjob, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 reason: ['course' 'home' 'other' 'reputation'] 
+reason
 course        267
 home          134
 reputation    132
 other          66
-Name: reason, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 guardian: ['father' 'mother' 'other'] 
+guardian
 mother    421
 father    138
 other      40
-Name: guardian, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 traveltime: [1 2 3 4] 
+traveltime
 1    341
 2    192
 3     52
 4     14
-Name: traveltime, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 studytime: [1 2 3 4] 
+studytime
 2    285
 1    189
 3     94
 4     31
-Name: studytime, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 failures: [0 1 2 3] 
+failures
 0    503
 1     67
 2     16
 3     13
-Name: failures, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 schoolsup: ['no' 'yes'] 
+schoolsup
 no     535
 yes     64
-Name: schoolsup, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 famsup: ['no' 'yes'] 
+famsup
 yes    369
 no     230
-Name: famsup, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 paid: ['no' 'yes'] 
+paid
 no     562
 yes     37
-Name: paid, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 activities: ['no' 'yes'] 
+activities
 no     303
 yes    296
-Name: activities, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 nursery: ['no' 'yes'] 
+nursery
 yes    483
 no     116
-Name: nursery, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 higher: ['no' 'yes'] 
+higher
 yes    534
 no      65
-Name: higher, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 internet: ['no' 'yes'] 
+internet
 yes    458
 no     141
-Name: internet, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 romantic: ['no' 'yes'] 
+romantic
 no     381
 yes    218
-Name: romantic, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 famrel: [1 2 3 4 5] 
+famrel
 4    291
 5    171
 3     91
 2     28
 1     18
-Name: famrel, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 freetime: [1 2 3 4 5] 
+freetime
 3    230
 4    167
 2     99
 5     62
 1     41
-Name: freetime, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 goout: [1 2 3 4 5] 
+goout
 3    193
 2    136
 4    127
 5     99
 1     44
-Name: goout, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 Dalc: [1 2 3 4 5] 
+Dalc
 1    419
 2    111
 3     39
 4     16
 5     14
-Name: Dalc, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 Walc: [1 2 3 4 5] 
+Walc
 1    234
 2    136
 3    107
 4     84
 5     38
-Name: Walc, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 health: [1 2 3 4 5] 
+health
 5    231
 3    110
 4    102
 1     81
 2     75
-Name: health, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 absences: [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 18 21 22 24 26 30 32] 
+absences
 0     229
 2     100
 4      88
@@ -242,10 +272,11 @@ absences: [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 18 21 22 24 26 30 
 30      1
 22      1
 13      1
-Name: absences, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 G1: [ 0  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19] 
+G1
 11    84
 10    83
 12    76
@@ -263,10 +294,11 @@ G1: [ 0  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19]
 4      2
 0      1
 19     1
-Name: G1, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 G2: [ 0  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19] 
+G2
 11    95
 12    78
 10    77
@@ -283,10 +315,11 @@ G2: [ 0  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19]
 6      6
 5      3
 19     1
-Name: G2, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 G3: [ 0  1  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19] 
+G3
 11    98
 10    88
 13    76
@@ -304,7 +337,7 @@ G3: [ 0  1  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19]
 6      2
 1      1
 5      1
-Name: G3, dtype: int64
+Name: count, dtype: int64
 --------------------------------------------------
 
 Unnamed: 33: ['0,003121823' '0,00352748' '0,004933028' '0,006919475' '0,008259336'
@@ -427,6 +460,7 @@ Unnamed: 33: ['0,003121823' '0,00352748' '0,004933028' '0,006919475' '0,00825933
  '0,971260683' '0,976464336' '0,97738648' '0,983430845' '0,985081337'
  '0,986318032' '0,989957076' '0,990080316' '0,990274558' '0,991290694'
  '0,991513739' '0,993785522' '0,995143796' '0,99987391'] 
+Unnamed: 33
 0,581558765    1
 0,32442535     1
 0,789885814    1
@@ -438,6 +472,6 @@ Unnamed: 33: ['0,003121823' '0,00352748' '0,004933028' '0,006919475' '0,00825933
 0,501043616    1
 0,701595224    1
 0,343781784    1
-Name: Unnamed: 33, Length: 599, dtype: int64
+Name: count, Length: 599, dtype: int64
 --------------------------------------------------
 

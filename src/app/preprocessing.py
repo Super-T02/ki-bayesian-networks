@@ -49,7 +49,7 @@ class Preprocessing(abc.ABC):
     
 class BinaryPreprocessing(Preprocessing):
     """Preprocessing binary data."""
-    STRUCTURE = ['school', 'sex', 'age', 'address', 'famsize', 'Pstatus', 'Medu', 'Fedu', 'Mjob', 'Fjob', 'reason', 'guardian', 'traveltime', 'studytime', 'failures', 'schoolsup', 'famsup', 'paid', 'activities', 'nursery', 'higher', 'internet', 'romantic', 'famrel', 'freetime', 'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2', 'G3']
+    STRUCTURE = ['school', 'sex', 'age', 'address', 'famsize', 'Pstatus', 'Medu', 'Fedu', 'Mjob', 'Fjob', 'reason', 'guardian', 'traveltime', 'studytime', 'failures', 'schoolsup', 'famsup', 'paid', 'activities', 'nursery', 'higher', 'internet', 'romantic', 'famrel', 'freetime', 'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2', 'G3', '_weight']
     
     def __init__(self, data: pd.DataFrame) -> "Preprocessing":
         super().__init__(data)
@@ -206,19 +206,19 @@ class TunedPreprocessing(BinaryPreprocessing):
         # Alcohol
         cols = self._extract_existing_cols(data, ['Dalc', 'Walc'])
         if len(cols) > 0:
-            data['alc'] = data[cols].median(axis=1).round(0)
+            data['alc'] = data[cols].median(axis=1).astype(np.float64).round(0).astype(int)
             data = data.drop(cols, axis=1)
 
         # Social
         cols = self._extract_existing_cols(data, ['goout', 'freetime'])
         if len(cols) > 0:
-            data['social'] = data[cols].median(axis=1).round(0)
+            data['social'] = data[cols].median(axis=1).astype(np.float64).round(0).astype(int)
             data = data.drop(cols, axis=1)
 
         # Parent education
         cols = self._extract_existing_cols(data, ['Medu', 'Fedu'])
         if len(cols) > 0:
-            data['Pedu'] = data[cols].median(axis=1).round(0)
+            data['Pedu'] = data[cols].median(axis=1).astype(np.float64).round(0).astype(int)
             data = data.drop(cols, axis=1)
 
         # Jobs

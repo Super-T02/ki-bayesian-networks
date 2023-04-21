@@ -7,6 +7,8 @@ import seaborn as sns
 
 class Evaluation():
     
+    GRADE_MAX = 20
+    GRADE_MIN = 0
     OFFSET = 0
     
     def __init__(self, y_true: np.ndarray, y_pred: np.ndarray) -> "Evaluation":
@@ -153,21 +155,34 @@ class Evaluation():
 class MultiClassEvaluation(Evaluation):
     
     MATCH_LESS_EQUAL = 0
-    GRADE_MAX = 17
-    GRADE_MIN = 7
-    OFFSET = 2
+    GRADE_MAX = 20
+    GRADE_MIN = 0
+    OFFSET = 0
     
-    def __init__(self, result: pd.DataFrame, match: str = 'G3'):
+    def __init__(self, result: pd.DataFrame, match: str = 'G3', is_string: bool = False, min_grade: int = 0, max_grade: int = 20, offset: int = 0):
         if f"{match}" not in result.columns or f"{match}_pred" not in result.columns:
             raise ValueError(f"The result DataFrame must contain the columns {match} and {match}_pred.")
         
-        self.y_true_str = result[f"{match}"].to_numpy().astype(str)
-        self.y_pred_str = result[f"{match}_pred"].to_numpy().astype(str)
+        self.GRADE_MIN = min_grade
+        self.GRADE_MAX = max_grade
+        self.OFFSET = offset
+        self.is_string = is_string
         
-        super().__init__(self.map_grades(self.y_true_str), self.map_grades(self.y_pred_str))    
+        y_true = result[f"{match}"].values
+        y_pred = result[f"{match}_pred"].values
+        
+        if is_string:
+            self.y_str_true = [str(i) for i in y_true.copy()]
+            self.y_str_pred = [str(i) for i in y_pred.copy()]
+            y_true = self.map_grades(y_true)
+            y_pred = self.map_grades(y_pred)
+            
+        
+        super().__init__(y_true, y_pred)
     
     def map_grades(self, grades: np.ndarray) -> np.ndarray:
         """Maps the grades to the correct values.
+        Example:
         <7 --> 0
         7 - 17 --> 1 - 11
         >17 --> 12
@@ -180,28 +195,34 @@ class MultiClassEvaluation(Evaluation):
         """
         grades = grades.copy()
         for i in range(len(grades)):
-            if grades[i] == '<7':
+            if grades[i] == f'<{self.GRADE_MIN}':
                 grades[i] = 0
-            elif grades[i] == '>17':
-                grades[i] = 12
+            elif grades[i] == f'>{self.GRADE_MAX}':
+                grades[i] = self.GRADE_MAX - self.GRADE_MIN + 2
             else:
-                grades[i] = int(grades[i]) - 6
+                grades[i] = int(grades[i]) - self.GRADE_MIN + 1
         return grades.astype(np.int64)
         
     def plot(self):
         """Plots the true and predicted labels."""
         # Set up plot
-        x = [f"<{self.GRADE_MIN}"] + [f'{i}' for i in range(self.GRADE_MIN, self.GRADE_MAX + 1)] + [f">{self.GRADE_MAX}"]
+        if self.is_string:
+            x = [f"<{self.GRADE_MIN}"] + [f'{i}' for i in range(self.GRADE_MIN, self.GRADE_MAX + 1)] + [f">{self.GRADE_MAX}"]
+        else:
+            x = [i for i in range(self.GRADE_MIN, self.GRADE_MAX + 1)]
         self._show_plot(x)
         
         
     def plot_confusion_matrix(self) -> None:
         """Plots the confusion matrix for a model."""
-        labels = [f"<{self.GRADE_MIN}"] + [f'{i}' for i in range(self.GRADE_MIN, self.GRADE_MAX + 1)] + [f">{self.GRADE_MAX}"]
-        cm = confusion_matrix(self.y_true_str, self.y_pred_str, labels=labels)
+        if self.is_string:
+            labels = [f"<{self.GRADE_MIN}"] + [f'{i}' for i in range(self.GRADE_MIN, self.GRADE_MAX + 1)] + [f">{self.GRADE_MAX}"]
+            cm = confusion_matrix(self.y_str_true, self.y_str_pred, labels=labels)
+        else:
+            labels = [i for i in range(self.GRADE_MIN, self.GRADE_MAX + 1)]
+            cm = confusion_matrix(self.y_true, self.y_pred)
         self._show_plot_confusion_matrix(cm, labels)
-        
-        
+
 class BinaryEvaluation(Evaluation):
     
     MATCH_LESS_EQUAL = 0
