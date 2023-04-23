@@ -1,19 +1,20 @@
-from app.preprocessing import TunedPreprocessing
+from app.preprocessing import BoundOutPutPreprocessing, TunedPreprocessing
 from pgmpy.models import BayesianNetwork
+from pgmpy.estimators import BayesianEstimator
 
 import pandas as pd
 
-class Network:
+class Model:
     """The final Bayesian network model."""
     
-    G_STATES = [i for i in range(0, 21, 1)]
+    G_STATES = ['<7'] + [f'{i}' for i in range(7, 18, 1)] + ['>17']
     STATES = {
         "G1": G_STATES, 
         "G2": G_STATES, 
         "G3": G_STATES,
         "school": [0, 1],
         "sex": [0, 1],
-        "age": [i for i in range(15, 23, 1)],
+        "age": [str(i) for i in range(15, 21, 1)] + ['>20'],
         "address": [0, 1],
         "famsize": [0, 1],
         "Pstatus": [0, 1],
@@ -38,16 +39,19 @@ class Network:
         "social": [i for i in range(1, 6, 1)],
         "alc": [i for i in range(1, 6, 1)],
         "health": [i for i in range(1, 6, 1)],
-        "absences": [i for i in range(0, 94, 1)],
+        "absences": [str(i) for i in range(0, 16, 1)] + ['>15'],
     }
         
-    def __init__(self, file_path: str, n_jobs: int = -1) -> "Network":
+    def __init__(self, file_path: str, n_jobs: int = -1) -> "Model":
         """Initializes the network."""
         self._njobs = n_jobs
         self.network = BayesianNetwork()
         self._state_names = self.STATES
         data = pd.read_csv(file_path, sep=";")
         pre = TunedPreprocessing(data)
+        pre.process()
+        data = pre.processed_data
+        pre = BoundOutPutPreprocessing(data)
         pre.process()
         self.train_data = pre.processed_data 
         self.train_data = self.train_data.drop(self.train_data[self.train_data['G3'] == 0].index)
@@ -75,16 +79,30 @@ class Network:
             self.network.add_node(col)
         
         # Edges for all sub networks
+        # Medu and Fedu
         edges = [
-            # Medu and Fedu
-            ('Pjob_at_home', 'Pedu'),
+            ('Pjob_at_home', 'internet'),
+            # ('Pjob_at_home', 'Pedu'),
+            # ('Pjob_teacher', 'Pedu'),
+            # ('Pjob_health', 'Pedu'),
+            # ('Pjob_other', 'Pedu'),
+            # ('Pjob_services', 'Pedu'),
             ('Pjob_at_home', 'school'),
-            ('Pjob_teacher', 'Pedu'),
             ('Pjob_teacher', 'school'),
-            ('Pjob_health', 'Pedu'),
             ('Pjob_health', 'school'),
-            ('Pjob_services', 'Pedu'),
-            ('Pjob_other', 'Pedu'),
+            ('Pjob_other', 'school'),
+            ('Pjob_services', 'school'),
+            # ('internet', 'Pjob_at_home'),
+            ('Pedu', 'Pjob_at_home'),
+            ('Pedu', 'Pjob_teacher'),
+            ('Pedu', 'Pjob_health'),
+            ('Pedu', 'Pjob_services'),
+            ('Pedu', 'Pjob_other'),
+            # ('school', 'Pjob_at_home'),
+            # ('school', 'Pjob_teacher'),
+            # ('school', 'Pjob_health'),
+            # ('school', 'Pjob_services'),
+            # ('school', 'Pjob_other'),
             ('Pedu', 'failures'),
             ('Pedu', 'higher'),
             ('Pedu', 'internet'),
@@ -103,8 +121,8 @@ class Network:
             ('sup', 'higher'),
             ('sup', 'studytime'),
             ('school', 'sup'),
-            # ('sup', 'age'),
             ('age', 'sup'),
+            ('age', 'alc'),
             ('sup', 'higher'),
             
             
@@ -123,7 +141,6 @@ class Network:
             ('absences', 'failures'),
             ('absences', 'school'),
             ('absences', 'higher'),
-            # ('absences', 'age'),
             ('age', 'absences'),
             
             # School
@@ -132,6 +149,7 @@ class Network:
             ('address', 'school'),
             ('school', 'traveltime'),
             ('address', 'traveltime'),
+            ('sex', 'studytime'),
             
             # Rest
             ('failures', 'higher'),
@@ -139,8 +157,35 @@ class Network:
             ('romantic', 'age'),
             ('guardian', 'age'),
             ('studytime', 'higher'),
+            
+            # Grades
+            ('G1', 'G3'),
+            ('G2', 'G3'),
+            
+            # # To G1 and G2
+            ('reason', 'G1'),
+            ('Pedu', 'G1'),
+            ('school', 'G1'),
+            ('failures', 'G1'),
+            ('higher', 'G1'),
+            ('studytime', 'G1'),
+            
+            ('reason', 'G2'),
+            ('Pedu', 'G2'),
+            ('school', 'G2'),
+            ('failures', 'G2'),
+            ('higher', 'G2'),
+            ('studytime', 'G2'),
+            
+            
+            
+            ('reason', 'G3'),
+            ('school', 'G3'),
+            ('failures', 'G3'),
+            ('higher', 'G3'),
+            ('studytime', 'G3'),
         ]
-        
+                
         # Add edges to the network
         self.add_edges(edges)
     
@@ -155,65 +200,14 @@ class Network:
     
     def fit(self) -> None:
         """Fit the network to the data."""
-        self.network.fit(self.train_data, state_names=self._state_names, n_jobs=self._njobs)
+        self.network.fit(self.train_data,
+            state_names=self._state_names,
+            estimator=BayesianEstimator,
+            prior_type="BDeu",
+            equivalent_sample_size=len(self.train_data),
+            n_jobs=self._njobs,
+        )
     
     def get(self) -> BayesianNetwork:
         """Returns the network."""
         return self.network  
-        
-class NetworkG1G2(Network):
-    """The final Bayesian network model with missing G1 and G2."""
-    
-    def __init__(self, file_path: str, n_jobs: int = -1) -> "Network":
-        super().__init__(file_path, n_jobs)
-        
-    def create(self) -> None:
-        """Creates the network."""
-        super().create()
-        edges = [
-            ('Pedu', 'G3'),
-            ('school', 'G3'),
-            ('failures', 'G3'),
-            ('higher', 'G3'),
-            ('age', 'G3'),
-            ('alc', 'G3'),
-            ('studytime', 'G3'),
-        ]
-        
-        # Add edges to the network
-        self.add_edges(edges)
-        
-class NetworkG1OrG2(Network):
-    """The final Bayesian network model with missing G1 or G2."""
-    def __init__(self, file_path: str, n_jobs: int = -1) -> "Network":
-        super().__init__(file_path, n_jobs)
-        
-    def create(self) -> None:
-        """Creates the network."""
-        super().create()
-        edges = [
-            ('G1', 'G3'),
-            ('G2', 'G3'),
-            
-            ('reason', 'G1'),
-            ('address', 'G1'),
-            ('Pedu', 'G1'),
-            ('school', 'G1'),
-            ('failures', 'G1'),
-            ('higher', 'G1'),
-            # ('age', 'G1'),
-            ('alc', 'G2'),
-            ('studytime', 'G1'),
-            ('reason', 'G2'),
-            ('address', 'G2'),
-            ('Pedu', 'G2'),
-            ('school', 'G2'),
-            ('failures', 'G2'),
-            ('higher', 'G2'),
-            # ('age', 'G2'),
-            ('alc', 'G2'),
-            ('studytime', 'G2'),
-        ]
-        
-        # Add edges to the network
-        self.add_edges(edges)

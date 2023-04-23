@@ -127,8 +127,10 @@ class BinaryPreprocessing(Preprocessing):
         """
         data = data.copy()
         
-        data['absences'] = data['absences'].apply(lambda x: '>15' if x > 15 else f'{x}')
-        data['age'] = data['age'].apply(lambda x: '>20' if x > 20 else f'{x}')
+        if 'absences' in data.columns and type(data['absences'][0]) == np.int64:
+            data['absences'] = data['absences'].apply(lambda x: '>15' if x > 15 else f'{x}')
+        if 'age' in data.columns and type(data['age'][0]) == np.int64:
+            data['age'] = data['age'].apply(lambda x: '>20' if x > 20 else f'{x}')
         
         return data
         
@@ -306,8 +308,22 @@ class BoundOutPutPreprocessing(Preprocessing):
         """
         data = data.copy()
         
-        data['G1'] = data['G1'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
-        data['G2'] = data['G2'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
-        data['G3'] = data['G3'].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
+        data = self._bound_grade('G1', data)
+        data = self._bound_grade('G2', data)
+        data = self._bound_grade('G3', data)
     
+        return data
+    
+    def _bound_grade(self, name: str, data: pd.DataFrame) -> pd.DataFrame:
+        """Bounds the grade to the lower (7) and upper bound (17).
+
+        Args:
+            name (str): Name of the column.
+            data (pd.DataFrame): Data to be bounded.
+
+        Returns:
+            pd.DataFrame: Data with bounded column.
+        """
+        if name in data.columns and (type(data[name][0]) == int or type(data[name][0]) == np.int64):
+            data[name] = data[name].apply(lambda x: '<7' if x < 7 else '>17' if x > 17 else f'{x}')
         return data
