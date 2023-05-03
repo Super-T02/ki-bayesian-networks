@@ -17,7 +17,7 @@ class CmbxBuilder():
         self.boxes = {}
         
     def build(self) -> None:
-        """´Builds the comboboxes."""
+        """Builds the comboboxes."""
         cntr = 0
         for cmbx_settings in self.settings.values():
             self.boxes[cmbx_settings.name] = self.build_combobox(cmbx_settings, cntr)
