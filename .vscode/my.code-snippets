@@ -1,0 +1,73 @@
+{
+	"picture": {    
+        "prefix": "picture",
+		"scope": "latex",
+        "body": [
+            "\\begin{figure}[!htbp]",
+            "\t\\centering",
+            "\t\\includegraphics[width=1\\linewidth]{$1}",
+            "\t\\caption[$3]{$3$4}",
+            "\t\\label{fig:$2}",
+            "\\end{figure}"
+        ],
+        "description": "Picture in Latex"
+    },
+    "Listing": {
+        "prefix": "listing",
+        "body": [
+            "\\lstinputlisting[language=$1,caption={$2},label=$3]{$4}",
+            "$5"
+        ],
+        "description": "Input listing for latex"
+    },
+    "Listing from to": {
+        "prefix": "listing-from-to",
+        "body": [
+            "\\lstinputlisting[language=$1, firstline=$2, lastline=$3, caption={$4},label=$5]{$6}",
+            "$7"
+        ],
+        "description": "Input listing for latex"
+    },
+    "Multi Picture": {
+        "prefix": "multi-picture",
+        "body": [
+            "\\begin{figure}[!htbp]",
+            "\t\\centering",
+            "\t\\subfloat[$2]{",
+            "\t\t\\includegraphics[width=0.3\\textwidth]{$1}",
+            "\t\t\\label{fig:$3}",
+            "\t}",
+            "\t\\hfill",
+            "\t\\subfloat[$5]{",
+            "\t\t\\includegraphics[width=0.3\\textwidth]{$4}",
+            "\t\t\\label{$6}",
+            "\t\t}",
+            "\t\\hfill",
+            "\t\\subfloat[$8]{",
+            "\t\t\\includegraphics[width=0.3\\textwidth]{$7}",
+            "\t\t\\label{$9}",
+            "\t}",
+            "\t\\caption{$10}",
+            "\\end{figure}"
+        ],
+        "description": "Multiple Pictures to each other"
+    },
+    "equation": {
+        "prefix": "equation",
+        "body": [
+            "\\begin{equation}\\label{eq:$1}\\formelentry{$2}",
+            "\t$3",
+            "\\end{equation}"
+        ],
+        "description": "Gleichung mit Label und formelentry"
+    },
+    "Formel Conditions": {
+        "prefix": "conditions",
+        "body": [
+            "\\begin{conditions}",
+            "\t$1   &   $2 \\\\",
+            "\\end{conditions}"
+        ],
+        "description": "Bedingungen für eine Formel"
+    }
+}

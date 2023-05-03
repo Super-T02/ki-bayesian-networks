@@ -109,9 +109,6 @@ class BinaryPreprocessing(Preprocessing):
             data['internet'] = data['internet'].map({'yes': 1, 'no': 0})
         if 'romantic' in data.columns:
             data['romantic'] = data['romantic'].map({'yes': 1, 'no': 0})
-        # # !NOT SURE IF THIS IS CORRECT!
-        # if 'failures' in data.columns:
-        #     data['failures'] = data['failures'].apply(lambda x: 1 if x > 0 else 0)
         
         return data
     
