@@ -82,27 +82,16 @@ class Model:
         # Medu and Fedu
         edges = [
             ('Pjob_at_home', 'internet'),
-            # ('Pjob_at_home', 'Pedu'),
-            # ('Pjob_teacher', 'Pedu'),
-            # ('Pjob_health', 'Pedu'),
-            # ('Pjob_other', 'Pedu'),
-            # ('Pjob_services', 'Pedu'),
             ('Pjob_at_home', 'school'),
             ('Pjob_teacher', 'school'),
             ('Pjob_health', 'school'),
             ('Pjob_other', 'school'),
             ('Pjob_services', 'school'),
-            # ('internet', 'Pjob_at_home'),
             ('Pedu', 'Pjob_at_home'),
             ('Pedu', 'Pjob_teacher'),
             ('Pedu', 'Pjob_health'),
             ('Pedu', 'Pjob_services'),
             ('Pedu', 'Pjob_other'),
-            # ('school', 'Pjob_at_home'),
-            # ('school', 'Pjob_teacher'),
-            # ('school', 'Pjob_health'),
-            # ('school', 'Pjob_services'),
-            # ('school', 'Pjob_other'),
             ('Pedu', 'failures'),
             ('Pedu', 'higher'),
             ('Pedu', 'internet'),
@@ -162,7 +151,7 @@ class Model:
             ('G1', 'G3'),
             ('G2', 'G3'),
             
-            # # To G1 and G2
+            # To G1 and G2
             ('reason', 'G1'),
             ('Pedu', 'G1'),
             ('school', 'G1'),
