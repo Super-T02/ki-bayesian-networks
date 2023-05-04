@@ -7,6 +7,17 @@ This project contains a solution for classifying students grades based on Bayesi
 * Python 3.10.10
 * Python-Packages listend in `requirements.txt`
 
+For a quick installation of the requirements, use the following command:
+
+```bash
+cd path/to/project
+python3 -m venv .env
+source .env/bin/activate
+pip install -r requirements.txt
+```
+
+Alternatively, you can also use the `install.sh` script to install the requirements. The script will create a virtual environment and install the requirements in the virtual environment.
+
 ## 2. Repository Structure
 
 * `data` - contains the data used for this project
