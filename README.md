@@ -30,7 +30,7 @@ Alternatively, you can also use the `install.sh` script to install the requireme
   * `src/analyse-data.ipynb` - contains the data exploration and correlation analysis
   * `src/model.ipynb` - contains the model creation and evaluation of three different models
   * `src/app.ipynb` - contains the final application
-* `tasks` - contains the tasks for this project and the requirements for this project
+* `task` - contains the tasks for this project and the requirements for this project
 
 ## 3. Usage
 
