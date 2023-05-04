@@ -86,9 +86,9 @@ class Evaluation():
             y_true (list): The true labels.
             y_pred (list): The predicted labels.
         """
-        print("Accuracy:", self.accuracy)
-        print("Mean false error:", self.mean_false_error)
-        print("Mean absolute error:", self.mean_absolute_error)
+        print("Accuracy:", self.accuracy.round(3))
+        print("Mean false error:", self.mean_false_error.round(2))
+        print("Mean absolute error:", self.mean_absolute_error.round(2))
         print("Precision:", self.precision)
         print("Recall:", self.recall)
         print("F1 score:", self.f1_score)
