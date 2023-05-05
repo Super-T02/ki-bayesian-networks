@@ -22,8 +22,10 @@ Alternatively, you can also use the `install.sh` script to install the requireme
 
 * `data` - contains the data used for this project
 * `doc` - contains the documentation for this project
+  * `doc/correlations` - contains the correlation analysis for the data
   * `doc/cpds` - contains the cpds for the final model
   * `doc/documentation.pdf` - contains additional documentation which is not covered by the jupyter notebooks. *(The documentation is written in German, for a translation please contact me)*
+  * `doc/networks` - contains the normal and tuned network (the images are also documented in the `doc/documentation.pdf`)
 * `src` - contains the source code for this project and additional jupyter notebooks used for testing, data exploration and visualization
   * `src/app` - contains the source code for the application used for the final application
   * `src/helpers` - contains helper functions used for the visualization and data exploration
